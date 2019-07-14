@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<title>Get your edu-sharing instance NOW</title>
+
+<div class="container">
+  <div class="page-header">
+    <!-- jumbotron packs everything in a nice framed container -->
+    <div class="jumbotron">
+
+      <div class="row">
+
+        <div class="col-lg-3"></div>
+
+        <div class="col-lg-6">
+          <div id="ui">
+
+            <div class="row text-center">
+              <h1>Automatische Instanzierung von edu-sharing</h1>
+            </div>
+
+            <form method="POST" action="" class="form-group">
+              {{ form.hidden_tag() }}
+
+              <!-- ROW FOR INSTITUTION -->
+              <br>
+              {{ form.institution.label() }}
+              {{ form.institution(class="form-control") }}
+
+              <!-- ROW FOR FIRST AND LASTNAME -->
+              <br>
+              <div class="row">
+                <div class="col-lg-6">
+                  {{ form.firstname.label() }}
+                  {{ form.firstname(class="form-control") }}
+                </div>
+                <div class="col-lg-6">
+                  {{ form.lastname.label() }}
+                  {{ form.lastname(class="form-control") }}
+                </div>
+              </div>
+
+              <!-- ROW FOR EMAIL -->
+              <br>
+              {{ form.email.label() }}
+              {{ form.email(class="form-control") }}
+              <!-- ROW FOR STREET AND HOUSENUMBER -->
+              <br>
+              <div class="row">
+                <div class="col-lg-9">
+                  {{ form.street.label() }}
+                  {{ form.street(class="form-control") }}</div>
+
+                <div class="col-lg-2">
+                  {{ form.housenumber.label() }}
+                  {{ form.housenumber(class="form-control") }}</div>
+              </div>
+
+              <!-- ROW FOR LOCATION AND ZIP -->
+              <br>
+              <div class="row">
+                <div class="col-lg-6">
+                  {{ form.zip.label() }}
+                  {{ form.zip(class="form-control") }}</div>
+                <div class="col-lg-6">
+                  {{ form.location.label() }}
+                  {{ form.location(class="form-control") }}
+                </div>
+              </div>
+
+              <!-- DROPDOWN MENU FOR ESTIMATED USER NUMBER -->
+              <br>
+              <div class="row">
+                <div class="col-lg-12">
+                  {{ form.usernumber.label() }}
+                  <br>
+                  {{ form.usernumber(class="form-control") }}
+                </div>
+              </div>
+
+
+              <!-- IP1 Address  -->
+              <br>
+              <div class="row">
+                <div class="col-lg-12">
+                  {{ form.ip1.label() }}
+                  {{ form.ip1(class="form-control") }}
+                </div>
+              </div>
+
+              <!-- IP2 Address -->
+              <br>
+              <div class="row">
+                <div class="col-lg-12">
+                  {{ form.ip2.label() }}
+                  {{ form.ip2(class="form-control") }}
+                </div>
+              </div>
+
+              <!-- SUBMIT BUTTON -->
+              <br>
+              <div class="row">
+                <div class="col-lg-12">
+                  {{ form.submit(class="btn btn-primary btn-lg btn-block")}}
+                </div>
+              </div>
+          </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+</div>
+
+{% endblock %}
