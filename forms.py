@@ -20,10 +20,9 @@ class RegistrationForm(FlaskForm):
     zip = StringField('Zip',
                       validators=[DataRequired(), Length(min=2, max=20)])
 
-    user_number_choices = [('1', 'bis zu 300'),
-                           ('2', 'bis zu 500'),
-                           ('3', 'bis zu 1000'),
-                           ('4', 'bis zu 5000')]
+    user_number_choices = [('1', 'Moodle'),
+                           ('2', 'Wordpress'),
+                           ('3', 'edu-sahring')]
 
     usernumber = SelectField(
         'User_number', choices=user_number_choices, validators=[DataRequired()])
@@ -31,7 +30,6 @@ class RegistrationForm(FlaskForm):
     ip1 = StringField('IP1', validators=[
                       DataRequired(), IPAddress()])
 
-    ip2 = StringField('IP2', validators=[
-                      DataRequired(), IPAddress()])
+    ip2 = StringField('IP2', validators=[IPAddress()])
 
     submit = SubmitField('Absenden')

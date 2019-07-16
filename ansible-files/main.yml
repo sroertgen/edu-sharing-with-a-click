@@ -1,0 +1,9 @@
+- name: update package list
+  shell:
+  args:
+    ls
+  register: shell.out
+
+
+- name: debug
+  msg: '{{shell.out.stdout}}'

@@ -1,2 +1,0 @@
-# Open and change yml file
-https://stackoverflow.com/questions/29518833/editing-yaml-file-by-python
