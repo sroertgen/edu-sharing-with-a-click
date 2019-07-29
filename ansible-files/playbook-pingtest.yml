@@ -1,7 +1,0 @@
-
-name: Check connectivity to target servers
-hosts: all
-gather_facts: no
-tasks:
-  - name: Ping test
-    ping:

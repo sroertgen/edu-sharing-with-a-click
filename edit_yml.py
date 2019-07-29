@@ -1,22 +1,21 @@
-import sys
-import ruamel.yaml
+from ruamel.yaml import YAML
+
+yaml = YAML()
 
 
-# def edit_yml(input):
-#     print(input)
+def edit_yml(input):
+    print(input)
 
-# yaml = ruamel.yaml.YAML()
-# # yaml.preserve_quotes = True
-# with open('files/web_server.yml') as fp:
-#     data = yaml.load(fp)
-# for elem in data:
-#     if elem['name'] == 'sense2':
-#         elem['value'] = 1234
-#         break  # no need to iterate further
-# yaml.dump(data, sys.stdout)
+# Pfad anpassen
+    with open('ansible-templates/ansible_moodle/host_vars/web_server_template.yml') as fp:
+        data = yaml.load(fp)
+        print(data)
+        print(input)
+    for entry in data:
+        data['ansible_host'] = input['ip1']
+        data['ansible_user'] = input['uname']
+        data['ansible_ssh_pass'] = input['upasswd']
+        data['admin-mail'] = input['email']
 
-import yaml
-with open('ansible-files/main.yml') as info:
-    info_dict = yaml.load(info)
-
-print(info_dict)
+    with open("ansible-templates/ansible_moodle/host_vars/web_server.yml", "w") as outfile:
+        yaml.dump(data, outfile)
