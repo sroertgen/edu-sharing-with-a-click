@@ -1,0 +1,33 @@
+- name: Get apache
+  apt:
+    name: apache2
+    state: present
+  become: yes
+
+- name: Copy wordpress.conf
+  template:
+    src: wordpress.conf
+    dest: /etc/apache2/sites-available/wordpress.conf
+  become: yes
+
+- name: Enabled mod_rewrite
+  apache2_module:
+    name: rewrite
+    state: present
+  become: yes
+
+- name: a2ensite '{{ hostvars['web_server']['www-domain'] }}'
+  command: a2ensite wordpress.conf
+  args:
+    creates: /etc/apache2/sites-enabled/wordpress.conf
+  become: yes
+
+- name: a2dissite000-default.conf
+  command: a2dissite 000-default.conf
+  become: yes
+
+- name: Restart apache
+  service:
+    name: apache2
+    state: restarted
+  become: yes

@@ -1,0 +1,20 @@
+- name: Update package index
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install python packages
+  apt:
+    name: '{{ packages }}'
+    state: present
+  vars:
+    packages:
+      - python
+      - python3
+      - python-setuptools
+      - python-dev
+      - build-essential
+      - python-pip
+      - python3-pip
+      - python3-mysqldb
+  become: yes

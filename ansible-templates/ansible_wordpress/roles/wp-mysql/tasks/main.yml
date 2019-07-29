@@ -1,0 +1,25 @@
+---
+  - name: Create WP-Database
+    mysql_db:
+      login_user: "{{ hostvars['web_server']['mysql']['user'] }}"
+      login_password: "{{ hostvars['web_server']['mysql']['new_password'] }}"
+      name: "{{ hostvars['web_server']['wp_db_name']}}"
+      state: present
+    become: yes
+
+  - name: Create WP-User
+    mysql_user:
+      login_user: "{{ hostvars['web_server']['mysql']['user'] }}"
+      login_password: "{{ hostvars['web_server']['mysql']['new_password'] }}"
+      name: "{{ hostvars['web_server']['wp_db_user']}}"
+      host: localhost
+      password: "{{ hostvars['web_server']['wp_db_pass']}}"
+      priv: "{{ hostvars['web_server']['wp_db_priv']}}"
+      state: present
+    become: yes
+
+  - name: Restart MySql
+    service:
+      name: mysql
+      state: restarted
+    become: yes

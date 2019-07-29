@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+  <div class="page-header">
+    <!-- jumbotron packs everything in a nice framed container -->
+    <div class="jumbotron">
+
+
+
+      <h1 class="mb-3">Automatische Instanzierung von edu-sharing</h1>
+
+      <div>Registration Data</div>
+
+      <div>Display data: </div>
+
+      <a class="btn btn-primary btn-lg btn-block" href="{{url_for('make_instance')}}" name="moodle">Make my Instance!</a>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

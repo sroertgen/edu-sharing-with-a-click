@@ -1,0 +1,29 @@
+---
+- name: Install Certbot.
+  package: "name={{ certbot_package }} state=present"
+  become: yes
+
+- name: Install certbot nginx plugin
+  apt:
+    name: python-certbot-nginx
+    state: present
+  when:
+    - '"nginx" in certbot_create_standalone_stop_services'
+  become: yes
+
+- name: Install certbot apache plugin
+  apt:
+    name: '{{ packages }}'
+    state: present
+  vars:
+    packages:
+      - python3-certbot-apache
+      - python-certbot-apache
+  become: yes
+  when:
+    - '"apache" in certbot_create_standalone_stop_services'
+
+- name: Set Certbot script variable.
+  set_fact:
+    certbot_script: "{{ certbot_package }}"
+  become: yes

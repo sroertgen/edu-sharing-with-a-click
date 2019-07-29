@@ -1,0 +1,3 @@
+---
+- name: Generate new certificate if one doesn't exist.
+  command: "{{ certbot_create_command }}"

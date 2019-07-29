@@ -1,0 +1,11 @@
+- name: Install moodle packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - graphviz
+      - aspell
+      - ghostscript
+      - clamav
+  become: yes

@@ -1,0 +1,15 @@
+-
+  name: Deploy wordpress_server
+  hosts: web_server
+  roles:
+    - package_update
+    - python
+    - apache
+    - ufw
+    - mysql
+    - moodle_packages
+    - php
+    - moodle-mysql
+    - moodle
+
+#    - certbot

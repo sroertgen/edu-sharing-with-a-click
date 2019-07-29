@@ -1,0 +1,19 @@
+- name: open ports
+  ufw:
+    rule: '{{ item.rule }}'
+    port: '{{ item.port }}'
+    proto: '{{ item.proto }}'
+  with_items: "{{ hostvars['web_server']['ufw_ports'] }}"
+  become: yes
+
+- name: allow Apps
+  ufw:
+    rule: '{{ item.rule }}'
+    name: '{{ item.name }}'
+  with_items: "{{ hostvars['web_server']['ufw_apps'] }}"
+  become: yes
+
+- name: enable ufw
+  ufw:
+    state: enabled
+  become: yes

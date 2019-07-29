@@ -1,0 +1,30 @@
+- name: Install php packages and extensions
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - php
+      - libapache2-mod-php
+      - php-mysql
+      - php-curl
+      - php-gd
+      - php-mbstring
+      - php-xml
+      - php-xmlrpc
+      - php-soap
+      - php-intl
+      - php-zip
+  become: yes
+
+- name: Change dir.conf to first look for index.php
+  template:
+    src: dir.conf
+    dest: /etc/apache2/mods-enabled/dir.conf
+  become: yes
+
+- name: restart apache for recognizing changes
+  service:
+    name: apache2
+    state: restarted
+  become: yes

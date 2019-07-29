@@ -1,0 +1,65 @@
+- block:
+  - name: Install MySQL database
+    apt:
+      name: "{{ packages }}"
+      state:  present
+    vars:
+      packages:
+        - mysql-server=5.7.*
+        - mysql-client
+    tags:
+      - mysql
+    become: yes
+
+  - name: Install MySQL-python
+    pip:
+      name: mysql-connector-python
+      state: present
+      executable: pip3
+
+  - name: Restart mysql
+    service:
+      name: mysql
+      state: restarted
+
+  - name: configure mysql
+    ini_file:
+      dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+      section: mysqld
+      option: bind-address
+      value: "{{ mysql_bind_address }}"
+
+  - name: start and enable mysql
+    service:
+      name: "{{ mysql_service }}"
+      state: started
+      enabled: yes
+
+  - name: create databases
+    mysql_db:
+      name: "{{ item.name }}"
+      state: present
+      encoding: "{{ item.encoding | default(omit) }}"
+      collation: "{{ item.collation | default(omit) }}"
+    with_items:
+      - "{{ mysql_databases }}"
+    loop_control:
+      label: "{{ item.name }}"
+    when:
+      - mysql_databases is defined
+
+  - name: create users
+    mysql_user:
+      name: "{{ item.name }}"
+      state: present
+      password: "{{ item.password | default(omit) }}"
+      priv: "{{ item.priv | default(omit) }}"
+      host: "{{ item.host | default(omit) }}"
+    with_items:
+      - "{{ mysql_users }}"
+    loop_control:
+      label: "{{ item.name }}"
+    when:
+      - mysql_users is defined
+
+  become: yes

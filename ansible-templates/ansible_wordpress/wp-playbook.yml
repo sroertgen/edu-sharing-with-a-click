@@ -1,0 +1,13 @@
+-
+  name: Deploy wordpress_server
+  hosts: web_server
+  roles:
+    - package_update
+    - python
+    - apache
+    - ufw
+    - mysql
+    - php
+    - wp-mysql
+    - wp
+#    - certbot

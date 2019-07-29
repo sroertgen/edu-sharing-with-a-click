@@ -1,0 +1,149 @@
+- name: Check if moodle is downloaded
+  stat:
+    path: "{{ hostvars['web_server']['moodle_root_path']}}"
+  register: moodle_downloaded
+
+- name: Check if moodle-dir already exists
+  stat:
+    path: "{{ hostvars['web_server']['moodle_root_path']}}"
+  register: moodle_root_folder_created
+
+- name: Check if Moodle is installed
+  stat:
+    path: "{{ moodle_root_path}}/config.php"
+  register: moodle_installed
+
+- name: Check if moodledatadir already exists
+  stat:
+    path: "{{ hostvars['web_server']['moodle_datadir']}}"
+  register: moodle_datadir_created
+
+
+- name: Install git
+  apt:
+    name: git
+    state: present
+  become: yes
+
+- name: download moodle from git
+  git:
+    repo: git://git.moodle.org/moodle.git
+    dest: /opt/moodle
+    version: "{{ hostvars['web_server']['moodle_version']}}"
+  when: not moodle_downloaded.stat.exists
+  become: yes
+
+- name: Make moodledata dir
+  file:
+    path: "{{ hostvars['web_server']['moodle_datadir']}}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '777'
+  when: not moodle_datadir_created.stat.exists
+  become: yes
+
+# Because of using remote_src, "dest" does not have
+# to contain the dest_folder_name!
+- name: Copy local repo to /var/www/html
+  copy:
+    remote_src: yes
+    src: /opt/moodle
+    dest: "{{ hostvars['web_server']['moodle_install_path']}}"
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  when: not moodle_root_folder_created.stat.exists
+  become: yes
+#
+# - name: Change permissions for install for /var/www/html/moodle to 777
+#   file:
+#     path: /var/www/html/moodle
+#     state: directory
+#     mode: '777'
+#   become: yes
+
+- name: Install Moodle
+  command: >
+    php install.php
+    --chmod=0755
+    --wwwroot="http://{{ hostvars['web_server']['ansible_host']}}"
+    --dataroot="{{ hostvars['web_server']['moodle_datadir']}}"
+    --dbtype=mysqli
+    --dbhost="{{ hostvars['web_server']['moodle_database_host']}}"
+    --dbname="{{ hostvars['web_server']['app_db_name']}}"
+    --dbuser="{{ hostvars['web_server']['app_db_user']}}"
+    --dbpass="{{ hostvars['web_server']['app_db_pass']}}"
+    --dbport="{{ hostvars['web_server']['moodle_database_port']}}"
+    --prefix="{{ hostvars['web_server']['moodle_database_prefix']}}"
+    --fullname="{{ hostvars['web_server']['moodle_fullname']}}"
+    --shortname="{{ hostvars['web_server']['moodle_shortname']}}"
+    --adminuser="{{ hostvars['web_server']['moodle_admin_username']}}"
+    --adminpass="{{ hostvars['web_server']['moodle_admin_password']}}"
+    --adminemail="{{ hostvars['web_server']['moodle_admin_email']}}"
+    --non-interactive
+    --agree-license
+  args:
+    chdir: "{{ moodle_root_path }}/admin/cli"
+  when: not moodle_installed.stat.exists
+  become: yes
+
+- name: Enable debug mode
+  blockinfile:
+    path: "{{ moodle_root_path }}/config.php"
+    insertbefore: "require_once\\(__DIR__ \\. '/lib/setup\\.php'\\);"
+    marker: "# {mark} SETTINGS FOR DEVELOPMENT SERVERS"
+    state: "{{ moodle_enable_debug | ternary('present', 'absent') }}"
+    block: |
+      @error_reporting(E_ALL | E_STRICT);
+      @ini_set('display_errors', '1');
+      $CFG->debug = (E_ALL | E_STRICT);
+      $CFG->debugdisplay = 1;
+      $CFG->themedesignermode = true;
+  become: yes
+
+
+# Somehow after running install.php moodledata-dir, config.php had wrong owner
+# also mode of /var/www/html/moodle was wrong
+# to fix that we adjust the settings here
+
+- name: Make sure moodle_datadir has www-data as owner
+  file:
+    path: "{{ hostvars['web_server']['moodle_datadir']}}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '777'
+  become: yes
+
+- name: Make sure moodle_root_path has www-data as owner and right permissions
+  file:
+    path: "{{ hostvars['web_server']['moodle_root_path']}}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0775'
+  become: yes
+
+
+# Moodledata got wrong owner
+# config php had wrong owner
+# mode of /var/www/html/moodle was wrong
+
+#
+# - name: Change permissions for install for /var/www/html/moodle back 0755
+#   file:
+#     path: /var/www/html/moodle
+#     state: directory
+#     mode: '0755'
+#   become: yes
+
+
+# - name: Copy config.php
+#   template:
+#     src: config.php
+#     dest: /var/www/html/moodle/config.php
+#     owner: www-data
+#     group: www-data
+#     mode: '755'
+#   become: yes

@@ -1,0 +1,5 @@
+- name: copy info.php
+  template:
+    src: info.php
+    dest: /var/www/html/info.php
+  become: yes
