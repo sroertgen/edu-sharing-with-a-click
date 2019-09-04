@@ -1,0 +1,57 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+
+<h1 id="headline">Hallo</h1>
+<input type="text" name="name" id="input" value="Steffen">
+<select name="instances" id="instances">
+  <option value="wordpress">Wordpress</option>
+  <option value="moodle">Moodle</option>
+</select>
+
+<button id="button">Klick mich!</button>
+
+  <script>
+    var selection = document.getElementById("input").value;
+    console.log(selection);
+    document.getElementById("button").onclick = function () {
+      var selection = document.getElementById("input").value;
+      console.log(selection);
+      if (selection == "Lara"){
+        document.getElementById("headline").innerHTML = "Hallo " + selection;
+      }else{
+        document.getElementById("headline").innerHTML = "Hallo Unbekannter";
+      }
+
+    }
+
+    var instance = document.getElementById("instances").value;
+    console.log(instance);
+
+    if (instance == "wordpress"){
+    document.getElementById("headline").innerHTML = "Hallo Wordpress";
+    }else if(instance == "moodle"){
+    document.getElementById("headline").innerHTML = "Hallo Moodle";
+    }
+    
+    document.getElementById("instances").onchange = function(){
+    
+    var instance = document.getElementById("instances").value;
+    console.log(instance);
+    
+    if (instance == "wordpress"){
+      document.getElementById("headline").innerHTML = "Hallo Wordpress";
+    }else if(instance == "moodle"){
+      document.getElementById("headline").innerHTML = "Hallo Moodle";
+    }
+    
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,12 @@
+---
+  - include: mariadb.yml
+  - include: imagemagick.yml
+  - include: libreoffice.yml
+  - include: alfresco.yml
+  - include: banner.yml
+  - include: edusharing.yml
+  - include: users.yml
+  - include: pixabay.yml
+    when: connect_content_pixabay
+  - include: youtube.yml
+    when: connect_content_youtube

@@ -1,0 +1,8 @@
+ansible_host: 141.5.107.138
+esrender_url: http://{{esrender_base_domain}}/esrender
+ansible_connection: ssh
+ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+ansible_user: test3
+ansible_ssh_pass: ''
+ansible_become_pass: '{{ ansible_ssh_pass }}'
+esrender_base_domain: c107-139.cloud.gwdg.de

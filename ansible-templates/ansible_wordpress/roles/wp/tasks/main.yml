@@ -1,17 +1,21 @@
 - name: Check if WordPress directory exists in /var/www
   stat: path=/var/www/wordpress
-  register: check_path
+  register: wp_path
 
 - name: Check if Upgrade directory already exists in /tmp/wordpress/wp-content/upgrade
-  stat: path=//tmp/wordpress/wp-content/upgrade
+  stat: path=/tmp/wordpress/wp-content/upgrade
   register: check_upgrade_path
+
+- name: Is WordPress config already setup
+  stat: path=/var/www/wordpress/wp-config.php
+  register: wp_configured
 
 - name: Download WordPress
   get_url:
     url: https://wordpress.org/latest.tar.gz
     dest: /tmp/wordpress.tar.gz
 #    checksum: ""
-  when: not check_path.stat.exists
+  when: not wp_path.stat.exists
 
 - name: Extract WordPress
   unarchive:
@@ -20,7 +24,7 @@
     owner: www-data
     group: www-data
     copy: no
-  when: not check_path.stat.exists
+  when: not wp_path.stat.exists
   become: yes
 
 - name: touch .htaccess
@@ -29,18 +33,18 @@
     state: touch
     owner: www-data
     group: www-data
-  when: not check_path.stat.exists
+  when: not wp_path.stat.exists
   become: yes
 
-- name: Copy WordPress-config
-  copy:
-    remote_src: yes
-    src: /tmp/wordpress/wp-config-sample.php
-    dest: /tmp/wordpress/wp-config.php
-    owner: www-data
-    group: www-data
-  when: not check_path.stat.exists
-  become: yes
+# - name: Copy WordPress-config
+#   copy:
+#     remote_src: yes
+#     src: /tmp/wordpress/wp-config-sample.php
+#     dest: /tmp/wordpress/wp-config.php
+#     owner: www-data
+#     group: www-data
+#   when: not wp_path.stat.exists
+#   become: yes
 
 - name: Make Wordpress upgrade directory
   file:
@@ -55,12 +59,13 @@
   command: mv /tmp/wordpress /var/www/wordpress
   args:
     creates: /var/www/wordpress
-  when: not check_path.stat.exists
+  when: not wp_path.stat.exists
   become: yes
 
 - name: get keys
   command: curl -s https://api.wordpress.org/secret-key/1.1/salt/
   register: key_files
+  when: not wp_configured.stat.exists
 
 - name: Copy wp-config.php
   template:
@@ -68,4 +73,18 @@
     dest: /var/www/wordpress/wp-config.php
     owner: www-data
     group: www-data
+  when: not wp_configured.stat.exists
   become: yes
+
+- name: Install WordPress using wp-cli
+  command: >
+    wp core install 
+    --url="{{ (domain | length > 0) | ternary(domain, ansible_host) }}" 
+    --title={{ wp_site_title|quote }} 
+    --admin_user={{ wp_admin_user|quote }} 
+    --admin_password={{ wp_admin_pass|quote }} 
+    --admin_email={{ wp_admin_email|quote }}
+  args:
+    chdir: /var/www/wordpress
+  become: yes
+  become_user: "{{ remote_web_user }}"

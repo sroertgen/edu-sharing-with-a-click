@@ -1,0 +1,438 @@
+---
+- name: Ensure necessary packages are present
+  apt:
+    name: '{{ packages }}'
+    state: present
+  become: yes
+  vars:
+    packages:
+    - python-lxml
+    - unzip
+    - git
+  tags:
+  - packages
+  - root-task
+
+- name: Ensure lxml is installed in pip
+  pip:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - lxml
+      - pyopenssl
+  become: yes
+
+- name: download edu-sharing plugin
+  get_url:
+    url: "{{ edusharing_plugin_url }}"
+    dest: "{{ download_dir }}/es_plugin_moodle.tar.gz"
+  become: yes
+  become_user: "{{ansible_user}}"
+
+- name: Ensure unzip is present
+  package:
+    name: ["unzip"]
+  become: yes
+  tags:
+  - packages
+  - root-task
+
+- name: extract edu-sharing-plugin sources
+  unarchive:
+    remote_src: yes
+    src: "{{ download_dir }}/es_plugin_moodle.tar.gz"
+    dest: "{{ download_dir }}"
+    creates: "{{ edu_sharing_plugin_dir }}"
+  become: yes
+  become_user: "{{ansible_user}}"
+  tags:
+    - copy-moodle-es-plugin
+
+- name: Copy blocks folder to Moodle-install-dir
+  copy:
+    remote_src: yes
+    src: "{{ edu_sharing_plugin_dir }}/blocks"
+    dest: "{{ moodle_root_dir }}/moodle"
+    owner: www-data
+    group: www-data
+    mode: '1755'
+  tags:
+    - copy-moodle-es-plugin
+  become: yes
+
+- name: Copy filter folder to Moodle-install-dir
+  copy:
+    remote_src: yes
+    src: "{{ edu_sharing_plugin_dir }}/filter"
+    dest: "{{ moodle_root_dir }}/moodle"
+    owner: www-data
+    group: www-data
+    mode: '1755'
+  tags:
+    - copy-moodle-es-plugin
+  become: yes
+
+# ISSUE
+# Somehow lib/editor/atto/plugins/edusharing is not copied with copy module
+- name: Copy lib folder to Moodle-install-dir
+  copy:
+    remote_src: yes
+    src: "{{ edu_sharing_plugin_dir }}/lib"
+    dest: "{{ moodle_root_dir }}/moodle"
+    owner: www-data
+    group: www-data
+    mode: '1755'
+    directory_mode: yes
+  tags:
+    - copy-moodle-es-plugin
+  become: yes
+
+- name: Copy lib dir
+  command: >-
+    sudo -u www-data 
+    cp -r 
+    {{ edu_sharing_plugin_dir }}/lib
+    {{ moodle_root_dir }}/moodle
+  args:
+    creates: '{{ moodle_root_dir }}/moodle/lib/editor/atto/plugins/edusharing'
+
+- name: Copy mod folder to Moodle-install-dir
+  copy:
+    remote_src: yes
+    src: "{{ edu_sharing_plugin_dir }}/mod"
+    dest: "{{ moodle_root_dir }}/moodle"
+    owner: www-data
+    group: www-data
+    mode: '1755'
+  become: yes
+  tags:
+  - copy-moodle-es-plugin
+
+- name: Upgrade php
+  command: >-
+    sudo -u www-data
+    php upgrade.php --non-interactive
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle/admin/cli'
+
+- name: get esrepo metadata info
+  uri:
+    url: '{{ edu_sharing_url }}/metadata?format=lms'
+    method: GET
+    return_content: yes
+  register: esrepo_meta
+
+- name: Create a private key for moodle-app
+  openssl_privatekey:
+    path: '{{ base_dir }}/moodle.pem'
+    state: present
+
+- name: Read out private key
+  command: 'cat {{ base_dir }}/moodle.pem'
+  register: moodle_priv_key
+  
+
+- name: Create a public key out of generated private key
+  openssl_publickey:
+    privatekey_path: '{{ base_dir }}/moodle.pem'
+    path: '{{ base_dir }}/moodle_pub.pem'
+    state: present
+
+- name: Read out public key
+  command: 'cat {{ base_dir }}/moodle_pub.pem'
+  register: moodle_public_key
+
+- name: get esrepo public key
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='public_key']
+    content: 'text'
+  register: esrepo_public_key
+
+- name: get esrepo usagewebservice_wsdl
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='usagewebservice_wsdl']
+    content: 'text'
+  register: esrepo_usagewebservice_wsdl
+
+- name: get esrepo type
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='type']
+    content: 'text'
+  register: esrepo_type
+
+- name: get esrepo clientport
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='clientport']
+    content: 'text'
+  register: esrepo_clientport
+
+- name: get esrepo appcaption
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='appcaption']
+    content: 'text'
+  register: esrepo_appcaption
+
+- name: get esrepo protocol
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='protocol']
+    content: 'text'
+  register: esrepo_protocol
+
+- name: get esrepo contenturl
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='contenturl']
+    content: 'text'
+  register: esrepo_contenturl
+
+- name: get esrepo port
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='port']
+    content: 'text'
+  register: esrepo_port
+
+- name: get esrepo appid
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='appid']
+    content: 'text'
+  register: esrepo_appid
+
+- name: get esrepo domain
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='domain']
+    content: 'text'
+  register: esrepo_domain
+
+- name: get esrepo host
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='host']
+    content: 'text'
+  register: esrepo_host
+
+- name: get esrepo authenticationwebservice
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='authenticationwebservice']
+    content: 'text'
+  register: esrepo_authenticationwebservice
+
+- name: get esrepo authenticationwebservice_wsdl
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='authenticationwebservice_wsdl']
+    content: 'text'
+  register: esrepo_authenticationwebservice_wsdl
+
+- name: get esrepo clientprotocol
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='clientprotocol']
+    content: 'text'
+  register: esrepo_clientprotocol
+
+- name: get esrepo usagewebservice
+  xml:
+    xmlstring: "{{esrepo_meta.content}}"
+    xpath: /properties/entry[@key='usagewebservice']
+    content: 'text'
+  register: esrepo_usagewebservice
+
+- name: Register edusharing in moodle
+  vars:
+    esrepo_register_settings:
+      - {name: application_appid, set: moodle_plugin}
+      - {name: application_blowfishiv, set: initvect}
+      - {name: application_blowfishkey, set: thetestkey}
+      - {name: application_cc_gui_url, set: "http://{{ edu_sharing_base_domain }}:80/edu-sharing/"}
+      - {name: application_homerepid, set: "{{ esrepo_appid.matches[0]['entry'] }}"}
+      - {name: application_host, set: "{{ moodle_host }}"}
+      - {name: application_private_key, set: "{{ moodle_priv_key.stdout }}"}
+      - {name: application_public_key, set: "{{ moodle_public_key.stdout }}"}
+      - {name: application_type, set: LMS}
+      - {name: EDU_AUTH_AFFILIATION, set: 'moodle_plugin_{{ moodle_host }}' }
+      - {name: EDU_AUTH_AFFILIATION_NAME, set: 'moodle_plugin_{{ moodle_host }}' }
+      - {name: EDU_AUTH_CONVEYGLOBALGROUPS, set: 0}
+      - {name: EDU_AUTH_KEY, set: username}
+      - {name: EDU_AUTH_PARAM_NAME_EMAIL, set: email}
+      - {name: EDU_AUTH_PARAM_NAME_FIRSTNAME, set: firstname}
+      - {name: EDU_AUTH_PARAM_NAME_LASTNAME, set: lastname}
+      - {name: EDU_AUTH_PARAM_NAME_USERID, set: userid}
+      - {name: edu_guest_guest_id, set: esguest}
+      - {name: edu_guest_option, set: 0}
+      - {name: repository_appcaption, set: "{{esrepo_appcaption.matches[0]['entry'] }}"}
+      - {name: repository_appid, set: "{{esrepo_appid.matches[0]['entry'] }}"}
+      - {name: repository_authenticationwebservice, set: "{{esrepo_authenticationwebservice.matches[0]['entry'] }}"}
+      - {name: repository_authenticationwebservice_wsdl, set: "{{esrepo_authenticationwebservice_wsdl.matches[0]['entry'] }}"}
+      - {name: repository_clientport, set: "{{ esrepo_clientport.matches[0]['entry'] }}"}
+      - {name: repository_clientprotocol, set: "{{ esrepo_clientprotocol.matches[0]['entry'] }}"}
+      - {name: repository_contenturl, set: "{{ esrepo_contenturl.matches[0]['entry'] }}"}
+      - {name: repository_domain, set: "http://{{ edu_sharing_base_domain }}"}
+      - {name: repository_host, set: "{{ edu_sharing_host }}"}
+      - {name: repository_port, set: "{{ esrepo_port.matches[0]['entry'] }}"}
+      - {name: repository_protocol, set: "{{  esrepo_protocol.matches[0]['entry'] }}"}
+      - {name: repository_public_key, set: "{{ esrepo_public_key.matches[0]['entry'] }}"}
+      - {name: repository_type, set: "{{ esrepo_type.matches[0]['entry'] }}"}
+      - {name: repository_usagewebservice, set: "{{ esrepo_usagewebservice.matches[0]['entry'] }}"}
+      - {name: repository_usagewebservice_wsdl, set: "{{ esrepo_usagewebservice_wsdl.matches[0]['entry'] }}"}
+      # TODO get correct esrepo version
+      - {name: repository_version, set: 4.2}
+  command: >-
+    sudo -u www-data
+    php cfg.php --component=edusharing
+    --name="{{ item.name }}"
+    --set="{{item.set }}"
+  with_items:
+    - "{{esrepo_register_settings}}"
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle/admin/cli'
+
+- name: Upgrade php
+  command: >-
+    sudo -u www-data
+    php upgrade.php --non-interactive
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle/admin/cli'
+
+# For using atto-editor later, currently still working with edusharing editor
+- name: Copy atto-config
+  template:
+    src: atto-config
+    dest: '{{ moodle_root_dir }}/moodle/admin/cli'
+    owner: www-data
+    group: www-data
+    mode: 0775
+  become: yes
+
+- name: Read atto-config
+  command: cat atto-config
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle/admin/cli'
+  register: attoconfig
+
+# TODO Check if atto config gets set correct
+- name: Edit atto_editor
+  command: >-
+    sudo -u www-data
+    php cfg.php --component=editor_atto --name=toolbar --set="{{attoconfig.stdout}}"
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle/admin/cli'
+
+- name: Create moosh folder
+  file:
+    path: "{{ download_dir }}/moosh"
+    state: directory
+    mode: '1755'
+
+- name: Download and unarchive moosh
+  unarchive:
+    src: https://moodle.org/plugins/download.php/19211/moosh_moodle36_2019032200.zip
+    dest: "{{ download_dir }}"
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+    mode: '1775'
+    remote_src: yes
+
+- name: Link moosh.php systemwide
+  file:
+    src: '{{ download_dir }}/moosh/moosh.php'
+    dest: /usr/local/bin/moosh
+    state: link
+  become: yes
+
+- name: Set text editors
+  command: >-
+    sudo -u www-data
+    moosh config-set 
+    texteditors atto,edusharing,tinymce,textarea
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+
+
+# The problem with the last step of activating the filter is
+# that the moosh filter-set does not work here, because it
+# does not find edusharing. After clicking "Manage Filters" in
+# moodle Admin area the command would work.
+# To circumvent this we set all active filters to -9999 
+# with `moosh filter-set` insert edusharing into the table
+# and then reactivate. This way edusharing also gets sortorder 1
+
+- name: Set filter mathjaxloader to -9999
+  command: >-
+    sudo -u www-data
+    moosh filter-set mathjaxloader -9999
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+
+- name: Set filter activitynames to -9999
+  command: >-
+    sudo -u www-data
+    moosh filter-set activitynames -9999
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+
+- name: Set filter mediaplugin to -9999
+  command: >-
+    sudo -u www-data
+    moosh filter-set mediaplugin -9999
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+
+- name: Query the database to see if edusharing is already enabled
+  command: >-
+    sudo -u www-data
+    moosh sql-run "select * from mdl_filter_active"
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+  register: mdl_filter_active
+
+- name: Show query result
+  debug:
+    var: mdl_filter_active.stdout
+
+- name: Insert edusharing into mdl_filter_active table
+  command: >-
+    sudo -u www-data
+    moosh sql-run 
+    "insert into mdl_filter_active(id, filter, contextid, active, sortorder) values (4, 'edusharing', 1, 1, 4)"
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+  when: '"edusharing" not in mdl_filter_active.stdout'
+
+- name: Set filter mathjaxloader to 1
+  command: >-
+    sudo -u www-data
+    moosh filter-set mathjaxloader 1
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+
+- name: Set filter activitynames to 1
+  command: >-
+    sudo -u www-data
+    moosh filter-set activitynames 1
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+
+- name: Set filter mediaplugin to 1
+  command: >-
+    sudo -u www-data
+    moosh filter-set mediaplugin 1
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle'
+
+- name: Upgrade php
+  command: >-
+    sudo -u www-data
+    php upgrade.php --non-interactive
+  args:
+    chdir: '{{ moodle_root_dir }}/moodle/admin/cli'

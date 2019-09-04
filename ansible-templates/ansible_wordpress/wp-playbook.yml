@@ -9,5 +9,6 @@
     - mysql
     - php
     - wp-mysql
+    - wp-cli
     - wp
 #    - certbot

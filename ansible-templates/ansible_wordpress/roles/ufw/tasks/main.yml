@@ -3,14 +3,14 @@
     rule: '{{ item.rule }}'
     port: '{{ item.port }}'
     proto: '{{ item.proto }}'
-  with_items: "{{ hostvars['web_server']['ufw_ports'] }}"
+  with_items: "{{ ufw_ports }}"
   become: yes
 
 - name: allow Apps
   ufw:
     rule: '{{ item.rule }}'
     name: '{{ item.name }}'
-  with_items: "{{ hostvars['web_server']['ufw_apps'] }}"
+  with_items: "{{ ufw_apps }}"
   become: yes
 
 - name: enable ufw

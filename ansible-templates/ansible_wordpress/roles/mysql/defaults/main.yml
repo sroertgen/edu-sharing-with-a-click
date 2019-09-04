@@ -10,7 +10,7 @@ mysql_bind_address: 127.0.0.1
 #   - name: seconddb
 #
 mysql_users:
-  name: "{{ hostvars['web_server']['mysql']['user'] }}"
-  password: "{{ hostvars['web_server']['mysql']['new_password'] }}"
-  priv: "{{ hostvars['web_server']['mysql']['privileges'] }}"
-  host: "{{ hostvars['web_server']['mysql']['hosts'] }}"
+  name: "{{ mysql['user'] }}"
+  password: "{{ mysql['new_password'] }}"
+  priv: "{{ mysql['privileges'] }}"
+  host: "{{ mysql['hosts'] }}"

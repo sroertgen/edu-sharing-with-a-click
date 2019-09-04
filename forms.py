@@ -1,37 +1,59 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
+from wtforms import StringField, SubmitField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, IPAddress
 
 
 class RegistrationForm(FlaskForm):
-    institution = StringField('Institution', validators=[DataRequired(), Length(min=4, max=100)])
+    institution = StringField('Institution', render_kw={"placeholder": "Institution"})
+    # institution = StringField('Institution', validators=[DataRequired(), Length(min=4, max=100)], render_kw={"placeholder": "Institution"})
 
-    firstname = StringField('Vorname', validators=[DataRequired(), Length(min=2, max=20)])
+    firstname = StringField('Vorname', render_kw={"placeholder": "Vorname"})
 
-    lastname = StringField('Nachname', validators=[DataRequired(), Length(min=2, max=20)])
+    lastname = StringField('Nachname', render_kw={"placeholder": "Nachname"})
 
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('Email', render_kw={"placeholder": "Email"})
 
-    street = StringField('Straße', validators=[DataRequired(), Length(min=2, max=20)])
+    street = StringField('Straße', render_kw={"placeholder": "Straße"})
 
-    housenumber = StringField('Hausnummer', validators=[DataRequired(), Length(min=1, max=20)])
+    housenumber = StringField('Hausnummer')
 
-    location = StringField('Ort', validators=[DataRequired(), Length(min=2, max=20)])
-    zip = StringField('PLZ', validators=[DataRequired(), Length(min=2, max=20)])
+    location = StringField('Ort', render_kw={"placeholder": "Ort"})
 
-    instance_choices = [('1', 'Moodle'),
-                        ('2', 'Wordpress'),
-                        ('3', 'edu-sahring')]
+    zip = StringField('PLZ', render_kw={"placeholder": "PLZ"})
+
+    instance_choices = [('0', 'Bitte auswählen...'),
+                        ('moodle', 'Moodle'),
+                        ('wordpress', 'Wordpress'),
+                        ('edusharing', 'edu-sharing (optional mit Moodle)')]
 
     instance = SelectField(
         'Welche Art von Instanz?', choices=instance_choices, validators=[DataRequired()])
 
-    ip1 = StringField('IP1', validators=[DataRequired(), IPAddress()])
+    ip1 = StringField('IP1', validators=[DataRequired(), IPAddress()], render_kw={"placeholder": "192.168.178.1"})
 
-    # ip2 = StringField('IP2 (nur bei edu-sharing nötig, sont leer lassen)', validators=[IPAddress()])
+    uname1 = StringField("Username auf Server (IP1)", validators=[DataRequired()])
 
-    uname = StringField("Username auf Server", validators=[DataRequired()])
+    upasswd1 = StringField("Passwort des Nutzers auf Server (IP1)")
 
-    upasswd = StringField("Passwort des Nutzers auf Server")
+    domain1 = StringField("Domain des Servers (ohne http:// oder https:// )")
+
+    ip2 = StringField('IP2 (nur bei edu-sharing nötig, sont leer lassen)',
+                      render_kw={"placeholder": "192.168.178.1"})
+
+    uname2 = StringField("Username auf Server (IP2)")
+
+    upasswd2 = StringField("Passwort des Nutzers auf Server (IP2)")
+
+    moodle_registration = BooleanField("Soll zusätzlich eine Moodle-Instanz eingerichtet und mit dem Edu-Sharing Repositorium verbunden werden?")
+
+    moodle_ip = StringField('IP der Moodle-Instanz)',
+                        render_kw={"placeholder": "192.168.178.2"})
+
+    moodle_uname = StringField("Username auf Moodle-Instanz")
+
+    moodle_pw = StringField("Passwort des Users auf Moodle-Instanz")
+
+    moodle_domain = StringField(
+        "Domain des Moodle Servers (ohne http:// oder https:// )")
 
     submit = SubmitField('Absenden')

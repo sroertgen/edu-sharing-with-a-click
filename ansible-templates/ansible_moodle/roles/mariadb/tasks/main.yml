@@ -1,0 +1,57 @@
+---
+- name: Ensures /etc/mysql/mariadb.conf.d dir exists
+  file: path=/etc/mysql/mariadb.conf.d/ state=directory
+  tags:
+  - root-task
+
+- name: Configure MariaDB
+  template:
+    src: mysql.cnf
+    dest: /etc/mysql/mariadb.conf.d/moodle-changes.cnf
+  tags:
+  - root-task
+
+- name: Install MariaDB server package
+  package:
+    name: mariadb-server
+    state: present
+  tags:
+  - packages
+  - root-task
+
+- name: Start Mysql Service
+  service:
+    name: mysql
+    state: started
+    enabled: true
+  tags:
+  - root-task
+
+- name: Ensure mysql python packages are present
+  package:
+    name: python-mysqldb
+    state: present
+  become: yes
+  tags:
+  - packages
+  - root-task
+
+- name: Create a new database with name 'moodle'
+  mysql_db:
+    name: '{{moodle_db.name}}'
+    encoding: 'utf8mb4'
+    collation: 'utf8mb4_bin'
+    config_file: /etc/mysql/mariadb.conf.d/moodle-changes.cnf
+    state: present
+  become: yes
+  tags:
+  - root-task
+
+- name: Create moodle database user
+  mysql_user:
+    name: '{{moodle_db.user}}'
+    password: '{{moodle_db.password}}'
+    priv: '{{moodle_db.name}}.*:ALL'
+  become: yes
+  tags:
+  - root-task

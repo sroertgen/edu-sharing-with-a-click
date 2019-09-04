@@ -1,0 +1,131 @@
+---
+- name: stop alfresco
+  shell: '{{tomcat_stop_command}}'
+
+- name: Ensures inst-dir exists
+  file: path='{{edu_inst_dir}}' state=directory
+
+- name: download edu-sharing sources
+  get_url:
+    url: '{{edu_sharing_archive_url}}'
+    dest: "{{edu_inst_dir}}/edu-sharing.zip"
+
+- name: Ensure unzip is present
+  package:
+    name: ["unzip"]
+  become: yes
+  tags:
+  - packages
+  - root-task
+
+- name: extract edu-sharing sources
+  unarchive:
+    remote_src: yes
+    src: '{{edu_inst_dir}}/edu-sharing.zip'
+    dest: "{{edu_inst_dir}}"
+    creates: "{{edu_home}}"
+
+- name: set imprint url
+  xml:
+    path: '{{ edu_home }}/war/WEB-INF/classes/org/edu_sharing/service/config/client.config.xml'
+    xpath: '/config/values/imprintUrl'
+    value: '{{ edu_imprinturl | default("") }}'
+    pretty_print: yes
+  tags: edu-sharing-config
+
+- name: set privacyInformation url
+  xml:
+    path: '{{ edu_home }}/war/WEB-INF/classes/org/edu_sharing/service/config/client.config.xml'
+    xpath: '/config/values/privacyInformationUrl'
+    value: '{{ edu_privacyInformationUrl | default("") }}'
+    pretty_print: yes
+  tags: edu-sharing-config
+
+- name: set banner url
+  xml:
+    path: '{{ edu_home }}/war/WEB-INF/classes/org/edu_sharing/service/config/client.config.xml'
+    xpath: '/config/values/banner/url'
+    value: '{{ edu_banner_url | default("") }}'
+    pretty_print: yes
+  tags: edu-sharing-config
+
+- name: clear banner components
+  xml:
+    path: '{{ edu_home }}/war/WEB-INF/classes/org/edu_sharing/service/config/client.config.xml'
+    xpath: '/config/values/banner/components'
+    state: absent
+    pretty_print: yes
+  tags: edu-sharing-config
+
+- name: set banner components
+  xml:
+    path: '{{ edu_home }}/war/WEB-INF/classes/org/edu_sharing/service/config/client.config.xml'
+    xpath: '/config/values/banner'
+    add_children: '<components>{{ item }}</components>'
+    input_type: xml
+    pretty_print: yes
+  with_items: '{{edu_banner_components}}'
+  tags: edu-sharing-config
+
+- name: edit edu-sharing build.properties
+  lineinfile:
+    path: '{{ edu_home }}/build.properties'
+    line: 'webserver.home={{tomcat_home}}'
+    regexp: '^webserver.home=.*$'
+
+- name: edit edu-sharing call-ant.sh
+  replace:
+    path: '{{ edu_home }}/call-ant.sh'
+    replace: '{{java_home}}/bin/java '
+    regexp: '^java '
+
+- name: edit edu-sharing call-ant.sh
+  replace:
+    path: '{{ edu_home }}/call-ant.sh'
+    replace: '-classpath '
+    regexp: '-Djava.ext.dirs='
+
+- name: make edu-sharing install.sh executable
+  file:
+    path: '{{ edu_home }}/install.sh'
+    mode: 'a+x'
+
+- name: run edu-sharing install.sh
+  shell: '{{ edu_home }}/install.sh'
+  args:
+    chdir: '{{ edu_home }}'
+
+- name: add or edit properties in tomcat/shared/classes/homeApplication.properties.xml
+  lineinfile:
+    path: '{{ tomcat_home }}/shared/classes/homeApplication.properties.xml'
+    line: '<entry key="{{item[0]}}">{{item[1]}}</entry>'
+    regexp: '<entry key="{{item[0]}}">'
+    insertbefore: '</properties>'
+  loop:
+    - ["appid", '{{edu_repo_id}}']
+    - ["appcaption", '{{edu_repo_caption}}']
+    - ["clientport", '80']
+    - ["port", '80']
+    - ["domain", '{{edu_sharing_domain}}']
+    - ["host", '{{edu_sharing_host}}']
+    - ["password", '{{alf_password}}']
+
+- name: edit mail properties in tomcat/shared/classes/ccmail.properties.xml
+  lineinfile:
+    path: '{{ tomcat_home }}/shared/classes/ccmail.properties.xml'
+    line: '<entry key="{{item[0]}}">{{item[1]}}</entry>'
+    regexp: '<entry key="{{item[0]}}">'
+    insertbefore: '</properties>'
+  loop:
+    - ["mail.report.receiver", '{{edu_mail_report_receiver | default("")}}']
+    - ["mail.authtype", '{{ edu_mail_authtype | default("") }}']
+    - ["mail.smtp.server", '{{ edu_mail_smtp_server | default("") }}']
+    - ["mail.smtp.passwd", '{{ edu_mail_smtp_passwd | default("") }}']
+    - ["mail.smtp.username", '{{ edu_mail_smtp_username | default("") }}']
+    - ["mail.smtp.port", '{{ edu_mail_smtp_port | default("25") }}']
+    - ["mail.smtp.from", '{{ edu_mail_smtp_from | default("pleasechange@nodomain.com") }}']
+
+- include: metadatasets.yml
+
+- name: start alfresco
+  shell: '{{tomcat_start_command}}'

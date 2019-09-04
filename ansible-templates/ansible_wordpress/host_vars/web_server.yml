@@ -1,34 +1,44 @@
 ansible_host: 141.5.107.139
 ansible_python_interpreter: /usr/bin/python3
+ansible_connection: ssh
+ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+ansible_user: cloud
+ansible_ssh_pass: ''
+ansible_become_pass: '{{ ansible_ssh_pass }}'
+
+remote_web_user: www-data
 
 ufw_ports:
-  - { rule: 'allow', port: '22', proto: 'tcp' }
-  - { rule: 'allow', port: '80', proto: 'tcp' }
-  - { rule: 'allow', port: '443', proto: 'tcp' }
+- {rule: allow, port: '22', proto: tcp}
+- {rule: allow, port: '80', proto: tcp}
+- {rule: allow, port: '443', proto: tcp}
 
 ufw_apps:
-  - { rule: 'allow', name: 'Apache Full' }
+- {rule: allow, name: Apache Full}
 
 venv_path: /home/cloud/myproject/myprojectenv
 
-domain: 'flask-edu-test.tk'
+domain: ''
+www-domain: www.{{ domain }}
 
-www-domain: 'www.flask-edu-test.tk'
-
-admin-mail: 'sroertg@gwdg.de'
+admin-mail: sroertg@gwdg.de
 
 mysql:
   user: root
-  old_password: ""
+  old_password: ''
   new_password: 123123
   hosts:
-    - "{{ ansible_hostname }}"
-    - "127.0.0.1"
-    - "::1"
-    - "localhost"
-  privileges: "*.*:ALL,GRANT"
+  - '{{ ansible_hostname }}'
+  - 127.0.0.1
+  - ::1
+  - localhost
+  privileges: '*.*:ALL,GRANT'
 
 wp_db_name: wordpress
 wp_db_user: wordpressuser
 wp_db_pass: 12345
 wp_db_priv: '*.*:ALL'
+wp_site_title: Meine automatische Wordpress Installation
+wp_admin_user: wpadmin
+wp_admin_pass: wpadmin
+wp_admin_email: sroertg@gwdg.de

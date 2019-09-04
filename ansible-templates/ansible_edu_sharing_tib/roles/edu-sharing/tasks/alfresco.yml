@@ -1,0 +1,75 @@
+---
+- name: download mysql jconnector (mariadb driver not supported by alfresco)
+  get_url:
+    url: '{{mysql_jconnector_url}}'
+    dest: "{{tomcat_home}}/lib/mysql-connector-java.jar"
+    force: yes # necessary for driver updates
+
+#- name: TEST - alfresco sources
+#  copy:
+#    src: alfresco-community-5.0.d.zip
+#    dest: "{{alf_inst_dir}}/alfresco-community-5.0.d.zip"
+
+- name: download alfresco sources
+  get_url:
+    url: '{{alf_sources_url}}'
+    dest: "{{alf_inst_dir}}/{{alf_name}}.zip"
+
+- name: Ensure unzip is present
+  package:
+    name: ["unzip"]
+  become: yes
+  tags:
+  - packages
+  - root-task
+
+- name: extract alfresco sources
+  unarchive:
+    remote_src: yes
+    src: '{{alf_inst_dir}}/{{alf_name}}.zip'
+    dest: "{{alf_inst_dir}}"
+    creates: "{{alf_home}}"
+
+- name: copy alresco war-files to tomcat
+  copy:
+    src: "{{item}}"
+    dest: "{{tomcat_home}}/webapps"
+    remote_src: yes
+  with_items:
+    - "{{alf_home}}/web-server/webapps/alfresco.war"
+    - "{{alf_home}}/web-server/webapps/share.war"
+
+- name: Ensures {{tomcat_home}}/shared dir exists
+  file: path={{tomcat_home}}/shared/ state=directory
+
+- name: copy alresco default tomcat config
+  copy:
+    src: "{{alf_home}}/web-server/shared/classes"
+    dest: "{{tomcat_home}}/shared/"
+    remote_src: yes
+
+- name: activate shared.loader for tomcat
+  lineinfile:
+    path: '{{ tomcat_home }}/conf/catalina.properties'
+    line: 'shared.loader=${catalina.base}/shared/classes'
+    regexp: 'shared.loader='
+
+- name: Configure alfresco-global.properties
+  template:
+    src: alfresco-global.properties
+    dest: '{{tomcat_home}}/shared/classes/alfresco-global.properties'
+
+- name: Ensure python-lxml packages are present
+  apt:
+    name: ["python-lxml"]
+  become: yes
+  tags:
+  - packages
+  - root-task
+
+- name: modify tomcat config - allow only local access
+  xml:
+    path: '{{tomcat_home}}/conf/server.xml'
+    xpath: /Server/Service/Connector
+    attribute: address
+    value: 127.0.0.1

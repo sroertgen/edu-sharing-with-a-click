@@ -1,0 +1,10 @@
+ansible_host: 141.5.108.175
+ansible_python_interpreter: /usr/bin/python3
+ansible_connection: ssh
+ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+ansible_user: cloud
+ansible_ssh_pass: Upc8Qgwn
+ansible_become_pass: '{{ ansible_ssh_pass }}'
+moodle_url: 'http://{{ moodle_base_domain }}'
+moodle_base_domain: c108-175.cloud.gwdg.de
+moodle_root_dir: /var/www/html

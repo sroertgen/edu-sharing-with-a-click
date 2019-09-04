@@ -1,54 +1,16 @@
-ansible_host: 141.5.107.139
+ansible_host: 141.5.108.175
 ansible_python_interpreter: /usr/bin/python3
 ansible_connection: ssh
+ansible_ssh_extra_args: -o StrictHostKeyChecking=no
 ansible_user: cloud
-ansible_ssh_pass:
+ansible_ssh_pass: ''
+ansible_become_pass: '{{ ansible_ssh_pass }}'
+moodle_url: http://{{ moodle_base_domain }}
+moodle_base_domain: c108-175.cloud.gwdg.de
 
-ufw_ports:
-- {rule: allow, port: '22', proto: tcp}
-- {rule: allow, port: '80', proto: tcp}
-- {rule: allow, port: '443', proto: tcp}
+edu_sharing_host: 141.5.107.138
+edu_sharing_base_domain: c107-138.cloud.gwdg.de
+edu_sharing_url: http://{{ edu_sharing_base_domain }}/edu-sharing
+edusharing_plugin_url: https://github.com/edu-sharing/plugin-moodle/archive/4.2.tar.gz
 
-ufw_apps:
-- {rule: allow, name: Apache Full}
-
-venv_path: /home/cloud/myproject/myprojectenv
-
-domain: flask-edu-test.tk
-
-www-domain: www.flask-edu-test.tk
-
-admin-mail: sroertg@gwdg.de
-
-mysql:
-  user: root
-  old_password: ''
-  new_password: 123123
-  hosts:
-  - '{{ ansible_hostname }}'
-  - 127.0.0.1
-  - ::1
-  - localhost
-  privileges: '*.*:ALL,GRANT'
-
-# Moodle confi settings
-moodle_version: v3.7.1
-moodle_install_path: /var/www/html
-moodle_root_path: '{{ moodle_install_path }}/moodle'
-moodle_download_path: /opt/moodle
-moodle_datadir: /var/moodledata
-moodle_database_host: localhost
-moodle_database_port: ''
-moodle_database_prefix: _mdl
-moodle_admin_username: admin
-moodle_admin_password: P@ssw0rd
-moodle_admin_email: admin@example.com
-moodle_enable_debug: true
-moodle_fullname: Mein Moodle
-moodle_shortname: mymoodle
-
-# Moodle database
-app_db_name: moodle
-app_db_user: moodledude
-app_db_pass: 12345
-app_db_priv: '{{ app_db_name }}.*:ALL,GRANT'
+base_dir: '{{ansible_env.HOME}}'

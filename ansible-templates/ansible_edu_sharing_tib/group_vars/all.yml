@@ -1,0 +1,29 @@
+---
+edu_sharing_host: "{{hostvars['edu_sharing_host']['ansible_host']}}"
+edu_sharing_domain: "{{ hostvars['edu_sharing_host']['edu_sharing_base_domain']}}"
+
+solr_host: '{{edu_sharing_host}}'
+
+esrender_host: "{{ hostvars['esrender_host']['ansible_host'] }}"
+esrender_url: "{{ hostvars['esrender_host']['esrender_url'] }}"
+
+moodle_host: "{{hostvars['moodle_host']['ansible_host']}}"
+moodle_url: "{{ hostvars['moodle_host']['moodle_url']}}"
+moodle_root_dir: "{{ hostvars['moodle_host']['moodle_root_dir']}}"
+
+mariadb_port: 3306
+esrender_db:
+  name: esrender
+  user: esrender
+  password: esrender
+
+tomcat_port: 8080
+tomcat_shutdown_port: 8005
+tomcat_ssl_port: 8443
+tomcat_ajp_port: 8009
+
+base_dir: "{{ansible_env.HOME}}"
+
+esrender_document_root: '/var/www'
+esrender_base_dir: '{{esrender_document_root}}/esrender'
+esrender_cache_dir: '/var/cache/esrender'

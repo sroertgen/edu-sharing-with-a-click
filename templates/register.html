@@ -7,7 +7,7 @@
     <div class="jumbotron">
       <div class="text py-5 py-md-0">
 
-        <h1 class="mb-3">Registrierung</h1>
+        <h1 class="mb-3" id="headline">Automatische Einrichtung</h1>
 
         <form method="POST" action="" class="form-group">
           {{ form.hidden_tag() }}
@@ -17,10 +17,12 @@
           {{ form.instance.label() }}
           {{ form.instance(class="form-control") }}
 
+          <div id="personal-information">
           <!-- ROW FOR INSTITUTION -->
           <br>
           {{ form.institution.label() }}
           {{ form.institution(class="form-control") }}
+
 
           <!-- ROW FOR FIRST AND LASTNAME -->
           <br>
@@ -62,9 +64,11 @@
               {{ form.location(class="form-control") }}
             </div>
           </div>
+          </div>
 
           <!-- IP1 Address  -->
           <br>
+          <h3>Server 1</h3>
           <div class="row">
             <div class="col-lg-12">
               {{ form.ip1.label() }}
@@ -72,27 +76,118 @@
             </div>
           </div>
 
-          <!-- Username auf Server -->
+          <!-- Domain Server1  -->
+          <br>
+          <div class="row">
+            <div class="col-lg-12">
+              {{ form.domain1.label() }}
+              {{ form.domain1(class="form-control") }}
+            </div>
+          </div>
+
+          <!-- Username IP1 auf Server -->
           <br>
           <div class="row">
             <div class="col-lg-12">
 
-              {{ form.uname.label() }}
-              <i>(Username muss in sudo-Gruppe sein!)</i>
-              {{ form.uname(class="form-control") }}
+              {{ form.uname1.label() }}
+              <i>(User muss in sudo-Gruppe sein!)</i>
+              {{ form.uname1(class="form-control") }}
             </div>
           </div>
 
-          <!-- Passwort auf Server (falls kein SSH-Key hinterlegt)-->
+          <!-- Passwort IP1 auf Server (falls kein SSH-Key hinterlegt)-->
           <br>
           <div class="row">
             <div class="col-lg-12">
-              {{ form.upasswd.label() }}
-              <i>(falls kein ssh-key dieses Servers auf dem Target-Server hinterlegt ist)</i>
-              {{ form.upasswd(class="form-control") }}
+              {{ form.upasswd1.label() }}
+              <i>(falls kein ssh-key dieses Servers auf dem Target-Server hinterlegt ist, sonst leer lassen)</i>
+              {{ form.upasswd1(class="form-control") }}
             </div>
           </div>
 
+
+          <div id="edusharing-block">
+            <!-- IP2 Address  -->
+            <br>
+            <h3>Server 2</h3>
+            <div class="row">
+              <div class="col-lg-12">
+                {{ form.ip2.label() }}
+                {{ form.ip2(class="form-control") }}
+              </div>
+            </div>
+
+
+            <!-- Username auf Server IP2 -->
+            <br>
+            <div class="row">
+              <div class="col-lg-12">
+
+                {{ form.uname2.label() }}
+                <i>(User muss in sudo-Gruppe sein!)</i>
+                {{ form.uname2(class="form-control") }}
+              </div>
+            </div>
+
+            <!-- Passwort auf Server IP2 (falls kein SSH-Key hinterlegt)-->
+            <br>
+            <div class="row">
+              <div class="col-lg-12">
+                {{ form.upasswd2.label() }}
+                <i>(falls kein ssh-key dieses Servers auf dem Target-Server hinterlegt ist, sonst leer lassen)</i>
+                {{ form.upasswd2(class="form-control") }}
+              </div>
+            </div>
+
+            <!-- Checkbox for moodle registration -->
+            <br>
+            <div class="row">
+              <div class="col-lg-12">
+                {{ form.moodle_registration.label() }}
+                {{ form.moodle_registration(onchange="show_moodle_block()", class="form-control") }}
+              </div>
+            </div>
+            
+          <div id="moodle-block">
+            <!-- ip for moodle registration -->
+            <br>
+            <div class="row">
+              <div class="col-lg-12">
+                {{ form.moodle_ip.label() }}
+                {{ form.moodle_ip(class="form-control") }}
+              </div>
+            </div>
+            
+            <!-- domain for moodle registration -->
+            <br>
+            <div class="row">
+              <div class="col-lg-12">
+                {{ form.moodle_domain.label() }}
+                {{ form.moodle_domain(class="form-control") }}
+              </div>
+            </div>
+            
+            <!-- Username for moodle registration -->
+            <br>
+            <div class="row">
+              <div class="col-lg-12">
+                {{ form.moodle_uname.label() }}
+                {{ form.moodle_uname(class="form-control") }}
+              </div>
+            </div>
+            
+            <!-- PW for moodle registration -->
+            <br>
+            <div class="row">
+              <div class="col-lg-12">
+                {{ form.moodle_pw.label() }}
+                {{ form.moodle_pw(class="form-control") }}
+              </div>
+            </div>
+            </div>
+            
+          </div>
 
 
           <!-- SUBMIT BUTTON -->
@@ -109,5 +204,45 @@
   </div>
 </div>
 
+<script>
+  document.getElementById("edusharing-block").style.display = "none"
+  document.getElementById("moodle-block").style.display = "none"
+  document.getElementById("personal-information").style.display = "none"
+  document.getElementById("submit").disabled = true;
+
+  document.getElementById("instance").onchange = function () {
+    var selection = document.getElementById("instance").value;
+    console.log(selection);
+
+    if (selection == "moodle") {
+      document.getElementById("headline").innerHTML = "Automatische Einrichtung einer Moodle-Instanz";
+      document.getElementById("edusharing-block").style.display = "none"
+    } else if (selection == "wordpress") {
+      document.getElementById("headline").innerHTML = "Automatische Einrichtung einer Wordpress-Instanz";
+      document.getElementById("edusharing-block").style.display = "none"
+    } else if (selection == "edusharing") {
+      document.getElementById("headline").innerHTML = "Automatische Einrichtung einer Edu-Sharing-Instanz";
+      document.getElementById("edusharing-block").style.display = "block"
+    } else if (selection == "0") {
+      document.getElementById("headline").innerHTML = "Automatische Einrichtung";
+      document.getElementById("edusharing-block").style.display = "none"
+    }
+    if (document.getElementById("instance").value != 0){
+    document.getElementById("submit").disabled = false;
+    } else {
+      document.getElementById("submit").disabled = true;
+    }
+
+  }
+
+  function show_moodle_block() {
+  if (document.getElementById("moodle_registration").checked == true){
+    document.getElementById("moodle-block").style.display = "block";
+  } else {
+    document.getElementById("moodle-block").style.display = "none";
+  } 
+  }
+  
+</script>
 
 {% endblock %}

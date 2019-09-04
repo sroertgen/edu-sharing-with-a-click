@@ -1,36 +1,36 @@
-- name: Get apache
+---
+- name: Install apache
   apt:
-    name: "{{ packages }}"
-    state: present
-  vars:
-    packages:
-      - apache2
-  become: yes
+    name: ["apache2"]
+    state: "present"
+  tags:
+  - packages
 
-- name: Copy wordpress.conf
-  template:
-    src: wordpress.conf
-    dest: /etc/apache2/sites-available/wordpress.conf
-  become: yes
-
-- name: Enabled mod_rewrite
+- name: apache - enabled mod_rewrite
   apache2_module:
-    name: rewrite
-    state: present
-  become: yes
+    name: "rewrite"
+    state: "present"
 
-- name: a2ensite '{{ hostvars['web_server']['www-domain'] }}'
-  command: a2ensite wordpress.conf
+- name: apache - enabled mod_headers
+  apache2_module:
+    name: "headers"
+    state: "present"
+
+- name: a2dissite default
+  command: a2dissite 000-default
   args:
-    creates: /etc/apache2/sites-enabled/wordpress.conf
-  become: yes
+    removes: /etc/apache2/sites-enabled/000-default.conf
+  notify:
+    - restart apache2
 
-- name: a2dissite000-default.conf
-  command: a2dissite 000-default.conf
-  become: yes
+- name: apache - add virtual host
+  template:
+    src: apache_vhost.conf.j2
+    dest: /etc/apache2/sites-available/moodle.conf
 
-- name: Restart apache
-  service:
-    name: apache2
-    state: restarted
-  become: yes
+- name: a2ensite moodle
+  command: a2ensite moodle
+  args:
+    creates: /etc/apache2/sites-enabled/moodle.conf
+  notify:
+    - restart apache2

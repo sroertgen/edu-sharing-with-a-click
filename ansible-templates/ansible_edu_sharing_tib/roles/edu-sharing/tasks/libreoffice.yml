@@ -1,0 +1,8 @@
+---
+  - name: Ensure libreoffice packages are present
+    apt:
+      name: ["libreoffice"]
+    become: yes
+    tags:
+    - packages
+    - root-task

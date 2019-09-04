@@ -1,0 +1,44 @@
+---
+es_proxy_vhost: true
+tomcat_user_solr_identity: true
+use_esguest_user: true
+
+connect_content_pixabay: false
+pixabay_apikey: CHANGE_ME
+
+connect_content_youtube: false
+youtube_apikey: CHANGE_ME
+
+#edu_version: 4.1.7
+#edu_version: 4.1.8
+edu_version: 4.2.2
+#edu_sharing_archive_url: https://github.com/edu-sharing/Edu-Sharing/releases/download/4.1.7/edu-sharing_4.1.7.2019-05-15-9ca4a3a2.zip
+# edu_sharing_archive_url: https://github.com/edu-sharing/Edu-Sharing/releases/download/4.1.8/edu-sharing_4.1.8.2019-07-29-b7fa22d8.zip
+edu_sharing_archive_url: https://github.com/edu-sharing/Edu-Sharing/releases/download/4.2.2/edu-sharing_4.2.2.2019-07-23-5a3bfb26.zip
+
+edu_inst_dir: "{{base_dir}}/edu-sharing_{{edu_version}}"
+edu_home: "{{edu_inst_dir}}/edu-sharing"
+
+edu_repo_caption: local-repo-vmtest
+edu_repo_id: local
+
+# the receiver address where to send mails
+edu_mail_report_receiver:
+# the encryption used to send mails, at the moment only "tls" or none (blank) is supported
+edu_mail_authtype: tls
+edu_mail_smtp_server:
+# the credentials on the mail server needed to send mails, leave blank if not needed
+edu_mail_smtp_username:
+edu_mail_smtp_passwd:
+# the mail server port
+edu_mail_smtp_port: 25
+# the sender address used to send mails
+edu_mail_smtp_from: pleasechange@nodomain.com
+
+edu_imprinturl:
+edu_privacyInformationUrl:
+edu_banner_url:
+edu_banner_components:
+  - search
+# path to a custom banner that will be copied into the edu-sharing instance
+edu_banner_path:

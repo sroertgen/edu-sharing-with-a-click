@@ -1,0 +1,49 @@
+---
+- name: get esrender meta info
+  uri:
+    url: '{{esrender_url}}/application/esmain/metadata.php'
+    method: GET
+    return_content: yes
+  register: esrender_meta
+
+- name: get esrender public key
+  xml:
+    xmlstring: "{{esrender_meta.content}}"
+    xpath: /properties/entry[@key='public_key']
+    content: 'text'
+  register: esrender_public_key
+
+- name: register esrender at edu-sharing - edit applicationfiles in tomcat/shared/classes/ccapp-registry.properties.xml
+  lineinfile:
+    backrefs: yes
+    path: '{{ tomcat_home }}/shared/classes/ccapp-registry.properties.xml'
+    line: '<entry key="applicationfiles">\g<start>\g<end>,app-esrender.properties.xml</entry>'
+    regexp: '^\s*<entry key="applicationfiles">(?P<start>(?:(?!,app-esrender.properties.xml).)*)(,app-esrender.properties.xml)?(?P<end>.*?)</entry>'
+
+- name: register esrender at edu-sharing - add tomcat/shared/classes/app-esrender.properties.xml
+  template:
+    src: app-esrender.properties.xml
+    dest: '{{tomcat_home}}/shared/classes/app-esrender.properties.xml'
+
+- name: edit contenturl in tomcat/shared/classes/homeApplication.properties.xml
+  lineinfile:
+    path: '{{ tomcat_home }}/shared/classes/homeApplication.properties.xml'
+    line: '<entry key="contenturl">{{esrender_url}}/application/esmain/index.php</entry>'
+    regexp: '<entry key="contenturl">'
+    insertbefore: '</properties>'
+
+- name: stop alfresco
+  shell: '{{tomcat_stop_command}}'
+
+- name: start alfresco
+  shell: '{{tomcat_start_command}}'
+
+- name: "wait for tomcat to come up"
+  uri:
+    url: 'http://{{edu_sharing_host}}/edu-sharing'
+    timeout: 60
+    status_code: 200
+  register: esresult
+  until: esresult.status == 200
+  retries: 15
+  delay: 1

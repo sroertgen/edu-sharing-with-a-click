@@ -1,0 +1,9 @@
+ansible_host: 141.5.107.138
+edu_sharing_domain: '{{edu_sharing_base_domain}}'
+ansible_connection: ssh
+ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+ansible_user: cloud
+ansible_ssh_pass: ''
+ansible_become_pass: '{{ ansible_ssh_pass }}'
+edu_sharing_url: http://{{ edu_sharing_base_domain}}/edu-sharing
+edu_sharing_base_domain: c107-138.cloud.gwdg.de

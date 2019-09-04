@@ -1,0 +1,8 @@
+---
+# - hosts: moodle_host
+#   roles:
+#     - esrepo-registration
+
+- hosts: edusharing
+  roles:
+    - moodle-registration

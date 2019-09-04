@@ -9,11 +9,11 @@ certbot_auto_renew_options: "--quiet --no-self-upgrade"
 # Parameters used when creating new Certbot certs.
 certbot_create_if_missing: true
 certbot_create_method: standalone
-certbot_admin_email: "{{hostvars['web_server']['admin-mail']}}"
+certbot_admin_email: "{{ admin-mail }}"
 certbot_certs:
   - domains:
-      - "{{hostvars['web_server']['domain']}}"
-      - "{{hostvars['web_server']['www-domain']}}"
+      - "{{ domain }}"
+      - "{{ www-domain }}"
 
 # - email: janedoe@example.com
 #   domains:
@@ -22,7 +22,7 @@ certbot_certs:
 # - domains:
 #     - example3.com
 certbot_create_command: >-
-  certbot --{{certbot_create_standalone_stop_services | join(',')}} --redirect --noninteractive --agree-tos -m {{hostvars['web_server']['admin-mail']}} -d {{cert_item.domains | join(',')}}
+  certbot --{{certbot_create_standalone_stop_services | join(',')}} --redirect --noninteractive --agree-tos -m {{ admin-mail }} -d {{cert_item.domains | join(',')}}
 
 certbot_create_standalone_stop_services:
 #  - nginx

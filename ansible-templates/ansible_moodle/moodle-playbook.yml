@@ -1,15 +1,20 @@
--
-  name: Deploy wordpress_server
-  hosts: web_server
+---
+- hosts: web_server
+  become: yes
   roles:
-    - package_update
+    - set-timezone
     - python
+    - mariadb
     - apache
-    - ufw
-    - mysql
-    - moodle_packages
-    - php
-    - moodle-mysql
     - moodle
+  tags:
+    - root-task
+
+- hosts: web_server
+  become: yes
+  roles: 
+    - edu-sharing-plugin
+  tags:
+    - edu-sharing-plugin
 
 #    - certbot

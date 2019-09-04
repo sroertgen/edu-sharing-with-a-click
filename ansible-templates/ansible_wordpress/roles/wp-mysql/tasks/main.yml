@@ -1,20 +1,20 @@
 ---
   - name: Create WP-Database
     mysql_db:
-      login_user: "{{ hostvars['web_server']['mysql']['user'] }}"
-      login_password: "{{ hostvars['web_server']['mysql']['new_password'] }}"
-      name: "{{ hostvars['web_server']['wp_db_name']}}"
+      login_user: "{{ mysql['user'] }}"
+      login_password: "{{ mysql['new_password'] }}"
+      name: "{{ wp_db_name }}"
       state: present
     become: yes
 
   - name: Create WP-User
     mysql_user:
-      login_user: "{{ hostvars['web_server']['mysql']['user'] }}"
-      login_password: "{{ hostvars['web_server']['mysql']['new_password'] }}"
-      name: "{{ hostvars['web_server']['wp_db_user']}}"
+      login_user: "{{ mysql['user'] }}"
+      login_password: "{{ mysql['new_password'] }}"
+      name: "{{ wp_db_user }}"
       host: localhost
-      password: "{{ hostvars['web_server']['wp_db_pass']}}"
-      priv: "{{ hostvars['web_server']['wp_db_priv']}}"
+      password: "{{ wp_db_pass }}"
+      priv: "{{ wp_db_priv }}"
       state: present
     become: yes
 
