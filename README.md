@@ -5,6 +5,8 @@ Bei der edu-sharing Instanz kann wahlweise direkt eine Moodle-Instanz angeschlos
 
 Diese App enstand während eines Hackathons des IT- und Sommercamps 2019 in Weimar das von dem Projekt JOINTLY (https://jointly.info) gehostet und durchgeführt wurde. 
 
+Die verwendeten Ansible-Skripte beruhen auf den Vorarbeiten der TIB Hannover (https://github.com/TIBHannover/edu-sharing-box, https://github.com/TIBHannover/moodle-box) und wurden lediglich leicht angepasst. Zusätzlich integriert wurde noch eine mögliche automatische Moodle-Integration mit dem aufgesetzten edu-sharing Repositorium.
+
 ## How to use
 
 Die App kann selbst gehostet werden. Dazu am besten zunächst eine virtuelle Umgebung einrichten. Hier eine Anleitung für Unix oder MacOS Umgebungen:
