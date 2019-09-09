@@ -24,7 +24,7 @@ def run_ansible(choice, moodle_registration):
 
     if choice == "edusharing":
         print("Creating an edu-sharing instance")
-        proc = subprocess.Popen(["ansible-playbook", "ansible-templates/ansible_edu_sharing_tib/edu-playbook.yml", "-i", "ansible-templates/ansible_edu_sharing_tib/inventory-edu-sharing.txt"], stdout=subprocess.PIPE, universal_newlines=True)
+        proc = subprocess.Popen(["ansible-playbook", "ansible-templates/ansible_edu_sharing/edu-playbook.yml", "-i", "ansible-templates/ansible_edu_sharing/inventory-edu-sharing.txt"], stdout=subprocess.PIPE, universal_newlines=True)
         print("Ansible running...creating edusharing instance...")
         for line in iter(proc.stdout.readline, ''):
             time.sleep(0.2)
@@ -41,8 +41,8 @@ def run_ansible(choice, moodle_registration):
     
             if edu_sharing_created == 1 and moodle_registration == 1:
                 print("Creating an edu-sharing instance")
-                proc = subprocess.Popen(["ansible-playbook", "ansible-templates/ansible_edu_sharing_tib/edu-playbook-moodle.yml", "-i",
-                                        "ansible-templates/ansible_edu_sharing_tib/inventory-es-moodle.txt"], stdout=subprocess.PIPE, universal_newlines=True)
+                proc = subprocess.Popen(["ansible-playbook", "ansible-templates/ansible_edu_sharing/edu-playbook-moodle.yml", "-i",
+                                        "ansible-templates/ansible_edu_sharing/inventory-es-moodle.txt"], stdout=subprocess.PIPE, universal_newlines=True)
                 print("Ansible running...registration of moodle in es instance...")
                 for line in iter(proc.stdout.readline, ''):
                     time.sleep(0.2)
