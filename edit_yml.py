@@ -41,11 +41,11 @@ def edit_yml(input, instance_choice, moodle_registration):
         print(f"Choice was: {instance_choice} and moodle_registration was {moodle_registration}")
         instance = "edu_sharing"
 
-        path_template_edu_sharing = "ansible-templates/ansible_edu_sharing_tib/host_vars/edu_sharing_host_template.yml"
-        path_template_esrender = "ansible-templates/ansible_edu_sharing_tib/host_vars/esrender_host_template.yml"
+        path_template_edu_sharing = "ansible-templates/ansible_edu_sharing/host_vars/edu_sharing_host_template.yml"
+        path_template_esrender = "ansible-templates/ansible_edu_sharing/host_vars/esrender_host_template.yml"
 
-        path_edited_edu_sharing_file = "ansible-templates/ansible_edu_sharing_tib/host_vars/edu_sharing_host.yml"
-        path_edited_esrender_file = "ansible-templates/ansible_edu_sharing_tib/host_vars/esrender_host.yml"
+        path_edited_edu_sharing_file = "ansible-templates/ansible_edu_sharing/host_vars/edu_sharing_host.yml"
+        path_edited_esrender_file = "ansible-templates/ansible_edu_sharing/host_vars/esrender_host.yml"
 
         # first edit edu_sharing_template
         with open(path_template_edu_sharing) as fp:
@@ -79,10 +79,10 @@ def edit_yml(input, instance_choice, moodle_registration):
             yaml.dump(data, outfile)
     
         if moodle_registration == 1:
-            path_template_moodle_host = "ansible-templates/ansible_edu_sharing_tib/host_vars/moodle_host_template.yml"
-            path_edited_moodle_host_file = "ansible-templates/ansible_edu_sharing_tib/host_vars/moodle_host.yml"
+            path_template_moodle_host = "ansible-templates/ansible_edu_sharing/host_vars/moodle_host_template.yml"
+            path_edited_moodle_host_file = "ansible-templates/ansible_edu_sharing/host_vars/moodle_host.yml"
 
-            # edit moodle host var file in edu_sharing_tib
+            # edit moodle host var file in edu_sharing
             with open(path_template_moodle_host) as fp:
                 data = yaml.load(fp)
                 print(data)
