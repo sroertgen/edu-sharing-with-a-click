@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Edu-Sharing with a Click
 
 Diese FLASK-App bietet die Möglichkeit möglichst unkompliziert eine edu-sharing, Moodle oder Wordpress Instanz aufzusetzen.
@@ -13,4 +14,3 @@ Die App kann selbst gehostet werden. Dazu am besten zunächst eine virtuelle Umg
 
 - Gehe an einen beliebigen Ort Deiner Wahl, öffne das Terminal:
   `git clone 
-
